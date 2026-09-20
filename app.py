@@ -10,36 +10,47 @@ st.set_page_config(
     layout="centered"
 )
 
-# ── 【究極のスタイリッシュ・ダークテーマCSS】 ──
+# ── 【視認性とデザインを極限まで高めたCSS】 ──
 st.markdown("""
     <style>
+    /* 全体の背景を深淵なダークネイビーに */
     .stApp {
-        background-color: #030712;
-        color: #f3f4f6;
+        background-color: #07090e;
+        color: #f8fafc;
     }
+    
+    /* タイトルの洗練 */
     h1 {
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         font-weight: 800;
-        background: linear-gradient(135deg, #a5b4fc, #c084fc, #f472b6);
+        font-size: 1.8rem !important;
+        background: linear-gradient(135deg, #818cf8, #e879f9);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         letter-spacing: -0.5px;
     }
-    /* チャットメッセージの洗練 */
-    .stChatMessage {
-        background-color: rgba(17, 24, 39, 0.7);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 16px;
-        padding: 12px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    
+    /* チャット吹き出しの視認性改善（文字をハッキリ白く、背景を美しく） */
+    div.stChatMessage {
+        background-color: #111827 !important;
+        border: 1px solid rgba(129, 140, 248, 0.2) !important;
+        border-radius: 14px;
+        padding: 14px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
     }
-    /* カードデザイン */
+    div.stChatMessage p, div.stChatMessage span {
+        color: #f1f5f9 !important;
+        font-size: 15px !important;
+        line-height: 1.6;
+    }
+
+    /* APIカードのスタイリング */
     .api-card {
-        background: linear-gradient(145deg, #111827, #1f2937);
-        border: 1px solid rgba(129, 140, 248, 0.3);
-        padding: 24px;
-        border-radius: 16px;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        background: linear-gradient(145deg, #0f172a, #1e1b4b);
+        border: 1px solid rgba(129, 140, 248, 0.4);
+        padding: 20px;
+        border-radius: 14px;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.5);
         margin-bottom: 20px;
     }
     </style>
@@ -47,38 +58,34 @@ st.markdown("""
 
 # ── 【ヘッダー】 ──
 st.title("🌌 Apeiron（アペイロン）")
-st.caption("✨ 終わりなき問いを通じて、思考の深淵へダイブするAI壁打ちアプリ。")
-st.markdown("---")
+st.markdown("<p style='color: #94a3b8; font-size: 13px; margin-top: -10px;'>終わりなき問いを通じて、思考の深淵へダイブするAI壁打ちアプリ。</p>", unsafe_allow_html=True)
+st.markdown("<hr style='border-color: rgba(255,255,255,0.1);'>", unsafe_allow_html=True)
 
-# ── 【APIキーの管理（メイン画面にわかりやすく配置）】 ──
+# ── 【APIキー管理】 ──
 if "api_key" not in st.session_state:
     st.session_state.api_key = ""
 
-# サイドバーまたはメインでのAPIキー入力
 api_key_input = st.sidebar.text_input("⚙️ Gemini API Key", type="password", value=st.session_state.api_key)
 if api_key_input:
     st.session_state.api_key = api_key_input
 
-# APIキーが未入力の場合は、メイン画面に美しいカードを表示して迷わせない
 if not st.session_state.api_key:
     st.markdown("""
         <div class="api-card">
-            <h3 style="color: #a5b4fc; margin-top: 0;">🔑 はじめに：APIキーの設定が必要です</h3>
-            <p style="color: #9ca3af; font-size: 14px;">
-                このアプリを動かすには、Google AI Studio等で取得した <b>Gemini APIキー</b> が必要です。<br>
-                下の入力欄、または左側のメニュー（サイドバー）に入力してください。
+            <h4 style="color: #a5b4fc; margin-top: 0;">🔑 APIキーの設定が必要です</h4>
+            <p style="color: #cbd5e1; font-size: 13px;">
+                アプリを動かすために、<b>Gemini APIキー</b>を入力してください。<br>（左側のメニューからも入力できます）
             </p>
         </div>
     """, unsafe_allow_html=True)
     
-    user_key = st.text_input("ここにGemini APIキーを入力", type="password")
+    user_key = st.text_input("ここにAPIキーを入力", type="password")
     if user_key:
         st.session_state.api_key = user_key
         st.rerun()
-        
-    st.stop() # キーが入るまでここで処理をストップ
+    st.stop()
 
-# ── 【API設定完了後のメイン処理】 ──
+# ── 【AI設定】 ──
 genai.configure(api_key=st.session_state.api_key)
 
 system_instruction = (
@@ -88,8 +95,9 @@ system_instruction = (
     "対話はどこまでも深く、無限に続きます。トーンは知的で洗練され、どこか神秘的であってください。"
 )
 
+# 安定稼働するモデルを指定
 model = genai.GenerativeModel(
-    model_name="gemini-1.5-pro",
+    model_name="gemini-1.5-flash",
     system_instruction=system_instruction
 )
 
@@ -99,10 +107,10 @@ if "messages" not in st.session_state:
     ]
     st.session_state.chat = model.start_chat(history=[])
 
-# ── 【サイドバー：ツール＆シェア機能】 ──
+# ── 【サイドバーツールーム】 ──
 with st.sidebar:
-    st.header("🛠️ ツールーム")
-    if st.button("🔄 対話をリセットする"):
+    st.header("🛠️ 思考のコントロール")
+    if st.button("🔄 対話を最初からやり直す"):
         st.session_state.messages = [
             {"role": "model", "parts": ["ようこそ、思索の旅へ。……今、あなたの頭の中にある『モヤモヤ』や『解きたい問い』は何ですか？"]}
         ]
@@ -110,7 +118,7 @@ with st.sidebar:
         st.rerun()
         
     st.markdown("---")
-    st.subheader("📥 保存・シェア")
+    st.subheader("📥 ログ保存 & シェア")
     
     if len(st.session_state.messages) > 1:
         log_text = "--- Apeiron 思考の記録 ---\n"
@@ -119,7 +127,7 @@ with st.sidebar:
             log_text += f"[{role}]\n{m['parts'][0]}\n\n"
         
         st.download_button(
-            label="📥 思考ログを保存",
+            label="📥 思考ログをファイル保存",
             data=log_text,
             file_name=f"apeiron_log_{datetime.datetime.now().strftime('%Y%m%d_%H%M')}.txt",
             mime="text/plain",
@@ -131,13 +139,16 @@ with st.sidebar:
         twitter_url = f"https://twitter.com/intent/tweet?text={tweet_text}"
         
         st.markdown(
-            f'<a href="{twitter_url}" target="_blank" style="text-decoration: none;"><div style="background: linear-gradient(135deg, #0ea5e9, #2563eb); color: white; padding: 10px 15px; border-radius: 10px; text-align: center; font-weight: bold; font-size: 14px; margin-top: 10px; box-shadow: 0 4px 12px rgba(14,165,233,0.3);">🐦 Xで思考をシェアする</div></a>',
+            f'<a href="{twitter_url}" target="_blank" style="text-decoration: none;"><div style="background: linear-gradient(135deg, #0ea5e9, #2563eb); color: white; padding: 10px 15px; border-radius: 10px; text-align: center; font-weight: bold; font-size: 13px; margin-top: 10px; box-shadow: 0 4px 12px rgba(14,165,233,0.3);">🐦 Xで思考をシェアする</div></a>',
             unsafe_allow_html=True
         )
     else:
         st.info("対話が進むと保存・シェア機能が有効になります。")
 
-# ── 【思考の核心アナリティクス】 ──
+# ── 【思考の深さカウンター & 核心アナリティクス】 ──
+depth_count = len(st.session_state.messages) // 2
+st.markdown(f"<p style='text-align: right; color: #818cf8; font-size: 12px; margin-bottom: 10px;'>🧠 対話の深さ: 第 {depth_count} 階層</p>", unsafe_allow_html=True)
+
 if len(st.session_state.messages) > 3:
     with st.expander("🔮 現在の思考の核心（AIアナリティクス）", expanded=False):
         with st.spinner("思考の軸を抽出中..."):
