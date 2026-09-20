@@ -10,41 +10,81 @@ st.set_page_config(
     layout="centered"
 )
 
-# ── 【視認性とデザインを極限まで高めたCSS】 ──
+# ── 【スマホ完全対応・入力文字くっきりスタイリッシュCSS】 ──
 st.markdown("""
     <style>
-    /* 全体の背景を深淵なダークネイビーに */
+    /* 全体の背景 */
     .stApp {
-        background-color: #07090e;
-        color: #f8fafc;
+        background-color: #05070b;
+        color: #f1f5f9;
     }
     
-    /* タイトルの洗練 */
-    h1 {
+    /* スマホでも絶対に崩れない洗練されたタイトルコンテナ */
+    .app-header {
+        background: linear-gradient(135deg, rgba(30, 27, 75, 0.6), rgba(15, 23, 42, 0.8));
+        border: 1px solid rgba(129, 140, 248, 0.2);
+        padding: 16px 20px;
+        border-radius: 16px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+        margin-bottom: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+    
+    .app-title {
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         font-weight: 800;
-        font-size: 1.8rem !important;
-        background: linear-gradient(135deg, #818cf8, #e879f9);
+        font-size: 1.4rem !important;
+        background: linear-gradient(135deg, #a5b4fc, #e879f9);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        letter-spacing: -0.5px;
+        margin: 0;
+        padding: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
     
-    /* チャット吹き出しの視認性改善（文字をハッキリ白く、背景を美しく） */
+    .app-subtitle {
+        color: #94a3b8;
+        font-size: 12px;
+        margin: 0;
+    }
+    
+    /* チャット吹き出しの視認性改善 */
     div.stChatMessage {
-        background-color: #111827 !important;
-        border: 1px solid rgba(129, 140, 248, 0.2) !important;
+        background-color: #0f172a !important;
+        border: 1px solid rgba(129, 140, 248, 0.15) !important;
         border-radius: 14px;
-        padding: 14px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+        padding: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
     }
     div.stChatMessage p, div.stChatMessage span {
-        color: #f1f5f9 !important;
-        font-size: 15px !important;
+        color: #f8fafc !important;
+        font-size: 14.5px !important;
         line-height: 1.6;
     }
 
-    /* APIカードのスタイリング */
+    /* ── 【入力中の文字＆プレースホルダーをハッキリ見やすくする設定】 ── */
+    /* テキスト入力欄（APIキーや通常入力）の文字を白くくっきりさせる */
+    .stTextInput input {
+        color: #ffffff !important;
+        background-color: #0b0f19 !important;
+        border: 1px solid rgba(129, 140, 248, 0.3) !important;
+    }
+    
+    /* チャット入力欄（st.chat_input）の文字とプレースホルダーの色を最適化 */
+    .stChatInput textarea {
+        color: #ffffff !important;
+        font-size: 15px !important;
+    }
+    .stChatInput textarea::placeholder {
+        color: #94a3b8 !important;
+        opacity: 1 !important;
+    }
+    
+    /* APIカード */
     .api-card {
         background: linear-gradient(145deg, #0f172a, #1e1b4b);
         border: 1px solid rgba(129, 140, 248, 0.4);
@@ -56,10 +96,13 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# ── 【ヘッダー】 ──
-st.title("🌌 Apeiron（アペイロン）")
-st.markdown("<p style='color: #94a3b8; font-size: 13px; margin-top: -10px;'>終わりなき問いを通じて、思考の深淵へダイブするAI壁打ちアプリ。</p>", unsafe_allow_html=True)
-st.markdown("<hr style='border-color: rgba(255,255,255,0.1);'>", unsafe_allow_html=True)
+# ── 【スマート・ヘッダー】 ──
+st.markdown("""
+    <div class="app-header">
+        <div class="app-title">🌌 Apeiron <span style="font-size: 1rem; font-weight: 400; color: #c084fc;">（アペイロン）</span></div>
+        <p class="app-subtitle">終わりなき問いを通じて、思考の深淵へダイブするAI壁打ち</p>
+    </div>
+""", unsafe_allow_html=True)
 
 # ── 【APIキー管理】 ──
 if "api_key" not in st.session_state:
@@ -72,8 +115,8 @@ if api_key_input:
 if not st.session_state.api_key:
     st.markdown("""
         <div class="api-card">
-            <h4 style="color: #a5b4fc; margin-top: 0;">🔑 APIキーの設定が必要です</h4>
-            <p style="color: #cbd5e1; font-size: 13px;">
+            <h4 style="color: #a5b4fc; margin-top: 0; font-size: 16px;">🔑 APIキーの設定が必要です</h4>
+            <p style="color: #cbd5e1; font-size: 13px; margin-bottom: 0;">
                 アプリを動かすために、<b>Gemini APIキー</b>を入力してください。<br>（左側のメニューからも入力できます）
             </p>
         </div>
@@ -95,7 +138,6 @@ system_instruction = (
     "対話はどこまでも深く、無限に続きます。トーンは知的で洗練され、どこか神秘的であってください。"
 )
 
-# 安定稼働するモデルを指定
 model = genai.GenerativeModel(
     model_name="gemini-1.5-flash",
     system_instruction=system_instruction
