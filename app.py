@@ -10,7 +10,7 @@ st.set_page_config(
     layout="centered"
 )
 
-# ── 【スマホ完全対応・入力文字くっきりスタイリッシュCSS】 ──
+# ── 【入力文字くっきり・完全保証CSS】 ──
 st.markdown("""
     <style>
     /* 全体の背景 */
@@ -19,7 +19,7 @@ st.markdown("""
         color: #f1f5f9;
     }
     
-    /* スマホでも絶対に崩れない洗練されたタイトルコンテナ */
+    /* 洗練されたタイトルコンテナ */
     .app-header {
         background: linear-gradient(135deg, rgba(30, 27, 75, 0.6), rgba(15, 23, 42, 0.8));
         border: 1px solid rgba(129, 140, 248, 0.2);
@@ -27,9 +27,6 @@ st.markdown("""
         border-radius: 16px;
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
         margin-bottom: 20px;
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
     }
     
     .app-title {
@@ -40,7 +37,6 @@ st.markdown("""
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         margin: 0;
-        padding: 0;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -52,7 +48,7 @@ st.markdown("""
         margin: 0;
     }
     
-    /* チャット吹き出しの視認性改善 */
+    /* チャット吹き出し */
     div.stChatMessage {
         background-color: #0f172a !important;
         border: 1px solid rgba(129, 140, 248, 0.15) !important;
@@ -66,21 +62,22 @@ st.markdown("""
         line-height: 1.6;
     }
 
-    /* ── 【入力中の文字＆プレースホルダーをハッキリ見やすくする設定】 ── */
-    /* テキスト入力欄（APIキーや通常入力）の文字を白くくっきりさせる */
-    .stTextInput input {
+    /* ── 【入力中の文字をハッキリくっきりさせる最強設定】 ── */
+    input, textarea, div[data-baseweb="input"] input, div[data-baseweb="base-input"] textarea {
         color: #ffffff !important;
-        background-color: #0b0f19 !important;
-        border: 1px solid rgba(129, 140, 248, 0.3) !important;
+        -webkit-text-fill-color: #ffffff !important;
+        font-weight: 600 !important;
     }
     
-    /* チャット入力欄（st.chat_input）の文字とプレースホルダーの色を最適化 */
+    /* チャット入力エリア全体のテキスト・プレースホルダー対策 */
     .stChatInput textarea {
         color: #ffffff !important;
+        -webkit-text-fill-color: #ffffff !important;
         font-size: 15px !important;
     }
     .stChatInput textarea::placeholder {
         color: #94a3b8 !important;
+        -webkit-text-fill-color: #94a3b8 !important;
         opacity: 1 !important;
     }
     
@@ -147,7 +144,13 @@ if "messages" not in st.session_state:
     st.session_state.messages = [
         {"role": "model", "parts": ["ようこそ、思索の旅へ。……今、あなたの頭の中にある『モヤモヤ』や『解きたい問い』は何ですか？"]}
     ]
-    st.session_state.chat = model.start_chat(history=[])
+
+# チャットセッションの初期化（エラー防止対応）
+if "chat" not in st.session_state:
+    history_for_gemini = [
+        {"role": m["role"], "parts": m["parts"]} for m in st.session_state.messages
+    ]
+    st.session_state.chat = model.start_chat(history=history_for_gemini)
 
 # ── 【サイドバーツールーム】 ──
 with st.sidebar:
@@ -187,19 +190,9 @@ with st.sidebar:
     else:
         st.info("対話が進むと保存・シェア機能が有効になります。")
 
-# ── 【思考の深さカウンター & 核心アナリティクス】 ──
+# ── 【思考の深さカウンター】 ──
 depth_count = len(st.session_state.messages) // 2
 st.markdown(f"<p style='text-align: right; color: #818cf8; font-size: 12px; margin-bottom: 10px;'>🧠 対話の深さ: 第 {depth_count} 階層</p>", unsafe_allow_html=True)
-
-if len(st.session_state.messages) > 3:
-    with st.expander("🔮 現在の思考の核心（AIアナリティクス）", expanded=False):
-        with st.spinner("思考の軸を抽出中..."):
-            try:
-                summary_prompt = "これまでの対話の核心を、鋭い1つのキーワードまたは短い哲学的な命題として抽出してください。解説は不要です。"
-                summary_res = st.session_state.chat.send_message(summary_prompt)
-                st.markdown(f"**現在のテーマ軸:** `{summary_res.text}`")
-            except:
-                st.write("対話が深まるにつれてここにテーマの核心が表示されます。")
 
 # ── 【チャット履歴の表示】 ──
 for message in st.session_state.messages:
@@ -214,8 +207,11 @@ if prompt := st.chat_input("あなたの考えや答えを入力..."):
 
     with st.chat_message("model"):
         with st.spinner("思考の深淵を覗いています..."):
-            response = st.session_state.chat.send_message(prompt)
-            ai_response = response.text
+            try:
+                response = st.session_state.chat.send_message(prompt)
+                ai_response = response.text
+            except Exception as e:
+                ai_response = f"思索の途中で波乱が起きました。もう一度送信してください。（エラー詳細: {e}）"
             st.markdown(ai_response)
             
     st.session_state.messages.append({"role": "model", "parts": [ai_response]})
